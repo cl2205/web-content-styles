@@ -74,6 +74,36 @@
     </div>
   </script>
 
+  <!-- Template for text input the user respond with. -->
+  <script id="template-mt-user-prompt" type="text/template">
+    <div>
+      <div class="mt message-bubble">
+        <? if (typeof message !== 'undefined') { ?>
+          <?- message ?>
+        <? } ?>
+      </div>
+      <form id="responseForm-<?= formCounter ?>" class="mt message-bubble">
+        <div>
+          <label>
+            <input type="text" name="response" placeholder="Enter your response">
+          </label>
+          <button type="submit">Send</button>
+        </div>
+      </form>
+    </div>
+  </script>
+
+  <!-- Template for user response message bubble. -->
+  <script id="template-user-response" class="mo-container" type="text/template">
+    <div>
+      <div class="mt message-bubble" style="background-color: lightblue; float: right; clear: right;">
+        <? if (typeof userResponse !== 'undefined') { ?>
+          <?- userResponse ?>
+        <? } ?>
+      </div>
+    </div>
+  </script>
+
   <!-- Template for a container for the mo-choices -->
   <script id="template-mo-container" type="text/template">
     <div id="mo-container-<?= messageCounter ?>" class="mo-container"></div>
