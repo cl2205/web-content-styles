@@ -135,6 +135,45 @@ html {
   transform: translate3d(0, 0, 0);
 }
 
+.form-control {
+  margin: 8px 0px 40px 0px;
+  height: 100%;
+}
+
+.user-input-field {
+  border-color: @color-user-bg;
+  -webkit-box-ordinal-group: 3;
+  -webkit-order: 2;
+  order: 2;
+  display: block;
+  background: none;
+  padding: 2px 2px 1px;
+  border-width: 0 0 1px;
+  line-height: 26px;
+  height: 30px;
+  -ms-flex-preferred-size: 26px;
+  border-radius: 0;
+  border-style: solid;
+  width: 100%;
+  box-sizing: border-box;
+  float: left;
+}
+
+.button {
+  font-size: 18px;
+  color: @color-user-bg;
+}
+
+.user-input-field:focus {
+  outline: none;
+}
+
+.user-response {
+  background: @color-user-bg;
+  color: @color-user-text;
+  border-radius: 20px 20px 20px 2px;
+}
+
 /**
  * Section that pops up when you make it to the end.
  */

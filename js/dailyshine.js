@@ -5,6 +5,9 @@
   // Delay before showing an MT message
   var DELAY_MT_DISPLAY = 450;
 
+  // Delay before showing a user response message
+  var DELAY_USER_RESPONSE_DISPLAY = 650;
+
   // Delay before showing the MO options
   var DELAY_MO_DISPLAY = 450;
 
@@ -110,6 +113,35 @@
     var template;
     var i;
     var showNextMessage = true;
+    var messageId;
+
+    function submitData(messageId, userResponse) {
+
+      var payload = {
+        user: getParameter('r') || 'anon',
+        messageId: messageId,
+        text: userResponse
+      };
+
+      $.post('/endpoint', payload)
+        .done(function() {
+
+        })
+        .fail(function() {
+
+        })
+        .always(function() {
+          displayUserResponse(userResponse);
+          // var displayDelay = 1000 * messages.length;
+          var displayDelay = DELAY_MT_DISPLAY;
+          var nextMessages = localized(content.nextMessages);
+          if (nextMessages && nextMessages.length > 0) {
+            loadMOChoices(nextMessages, displayDelay);
+          } else {
+            onMessagesFinished(displayDelay);
+          }
+        });
+    }
 
     // Merge user data into the message and turn URLs into links
     body = makeLinks(mergeData(localized(content.body)));
@@ -160,59 +192,35 @@
       else if (localized(content.promptForResponse)) {
         showNextMessage = false;
 
+        // render message
+        template = $('#template-mt').html();
+        html = ejs.render(template, data, {delimiter: '?'});
+        element = $('#container-messages').append(html).children(':last');
+        element.hide()
+            .delay(DELAY_MT_DISPLAY * (i + 1))
+            .fadeIn(DISPLAY_ANIM_DURATION);
         // render message with input field and add submit event listener
-        // @TODO: style user prompt input field/form
         template = $('#template-mt-user-prompt').html();
         formCounter++
+        messageId = 'dailyshine' + getParameter('date').replace(/-/g, '') + 'msg' + messageCounter;
         data.formCounter = formCounter;
         var inputHtml = ejs.render(template, data, {delimiter: '?'});
         var inputEl = $('#container-messages').append(inputHtml).children(':last');
 
-        inputEl.on('submit', function(event) {
+        inputEl.hide()
+            .delay(DELAY_MT_DISPLAY * (i + 3))
+            .fadeIn(DISPLAY_ANIM_DURATION, function() {
+              $('.user-input-field').focus();
+            });
+
+        // partially apply messageId
+        var handleSubmit = submitData.bind(this, messageId);
+        inputEl.on('submit', function(event, data) {
+          var userResponse = $('#responseForm-' + formCounter + ' input').val();
           event.preventDefault();
-          // @TODO: create payload and POST to endpoint
-          // $.post('/endpoint', payload, function(shineResponse) {
-          //   displayMT(shineResponse)
-          //   send server response, or display next message?
-          // });
-
-          // on submit, render user response bubble and add to DOM
-          // animate and scroll down
-          var userResponseTemplate = $('#template-user-response').html();
-          data.userResponse = $('#responseForm-' + formCounter + ' input').val();
-          var userResponseHtml = ejs.render(userResponseTemplate, data, {delimiter: '?'});
-          var responseEl = $('#container-messages').append(userResponseHtml).children(':last');
-          // @TODO: make DRY
-          $('#responseForm-' + formCounter).fadeOut(DISPLAY_ANIM_DURATION);
-          responseEl.hide()
-              .delay(DELAY_MT_DISPLAY * (i + 1))
-              .fadeIn(DISPLAY_ANIM_DURATION);
-
-          // @TODO: create custom event handler to scroll window on 'append' event
-          var delay = 750;
-          setTimeout(function() {
-            var start = $(window).scrollTop();
-            var dist = 1000;
-
-            $('html, body').animate({
-              scrollTop: start + dist,
-            }, SCROLL_ANIM_DURATION);
-          }, delay);
-
-          // @TODO display next message, add delay?
-          // @TODO Would Mo-Choice ever be displayed after user prompt message?
-          // Mo-choice css transform running into user response bubble/container on DOM
+          if (userResponse === "" ) return;
+          handleSubmit(userResponse);
           showNextMessage = true;
-          // Fetch MO options to show the user, if any
-          var displayDelay = 1000 * messages.length;
-          var nextMessages = localized(content.nextMessages);
-          if (nextMessages && nextMessages.length > 0) {
-            // displayNextMessage(nextMessages[0].sys['id']); load message - $get request
-            loadMOChoices(nextMessages, displayDelay);
-          }
-          else {
-            onMessagesFinished(displayDelay);
-          }
         });
         return;
       }
@@ -227,7 +235,7 @@
           .fadeIn(DISPLAY_ANIM_DURATION);
     }
 
-    if (displayNextMessage) {
+    if (showNextMessage) {
       // Fetch MO options to show the user, if any
       var displayDelay = DELAY_MT_DISPLAY * messages.length;
       var nextMessages = localized(content.nextMessages);
@@ -238,6 +246,8 @@
         onMessagesFinished(displayDelay);
       }
     }
+
+
   }
 
   /**
@@ -601,4 +611,31 @@
     }
   }
 
+/*  on submit, render user response bubble and add to DOM
+    animate and scroll down
+*/
+  function displayUserResponse(text) {
+    var data = {};
+    var userResponseTemplate = $('#template-user-response').html();
+    data.userResponse = text;
+    $('#responseForm-' + formCounter).fadeOut(DISPLAY_ANIM_DURATION);
+    var userResponseHtml = ejs.render(userResponseTemplate, data, {delimiter: '?'});
+
+    // @TODO: make DRY
+    var responseEl = $(userResponseHtml).hide()
+    .appendTo('#container-messages')
+    .delay(DELAY_USER_RESPONSE_DISPLAY)
+    .fadeIn();
+
+    // @TODO: create custom event handler to scroll window on 'append' event
+    var delay = 750;
+    setTimeout(function() {
+      var start = $(window).scrollTop();
+      var dist = 1000;
+
+      $('html, body').animate({
+        scrollTop: start + dist,
+      }, SCROLL_ANIM_DURATION);
+    }, delay);
+  }
 })();
