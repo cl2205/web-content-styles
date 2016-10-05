@@ -115,34 +115,6 @@
     var showNextMessage = true;
     var messageId;
 
-    function submitData(messageId, userResponse) {
-
-      var payload = {
-        user: getParameter('r') || 'anon',
-        messageId: messageId,
-        text: userResponse
-      };
-
-      $.post('/endpoint', payload)
-        .done(function() {
-
-        })
-        .fail(function() {
-
-        })
-        .always(function() {
-          displayUserResponse(userResponse);
-          // var displayDelay = 1000 * messages.length;
-          var displayDelay = DELAY_MT_DISPLAY;
-          var nextMessages = localized(content.nextMessages);
-          if (nextMessages && nextMessages.length > 0) {
-            loadMOChoices(nextMessages, displayDelay);
-          } else {
-            onMessagesFinished(displayDelay);
-          }
-        });
-    }
-
     // Merge user data into the message and turn URLs into links
     body = makeLinks(mergeData(localized(content.body)));
 
@@ -221,6 +193,14 @@
           if (userResponse === "" ) return;
           handleSubmit(userResponse);
           showNextMessage = true;
+          // var displayDelay = 1000 * messages.length;
+          var displayDelay = DELAY_MT_DISPLAY;
+          var nextMessages = localized(content.nextMessages);
+          if (nextMessages && nextMessages.length > 0) {
+            loadMOChoices(nextMessages, displayDelay);
+          } else {
+            onMessagesFinished(displayDelay);
+          }
         });
         return;
       }
@@ -638,4 +618,25 @@
       }, SCROLL_ANIM_DURATION);
     }, delay);
   }
+
+  function submitData(messageId, userResponse) {
+
+    var payload = {
+      user: getParameter('r') || 'anon',
+      messageId: messageId,
+      text: userResponse
+    };
+
+    $.post('/endpoint', payload)
+      .done(function() {
+        // do something on success
+      })
+      .fail(function() {
+        // do something on error
+      })
+      .always(function() {
+        displayUserResponse(userResponse);
+      });
+  }
+
 })();
