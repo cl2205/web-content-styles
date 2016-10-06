@@ -6,13 +6,16 @@
   var DELAY_MT_DISPLAY = 450;
 
   // Delay before showing a user response message
-  var DELAY_USER_RESPONSE_DISPLAY = 650;
+  var DELAY_USER_RESPONSE_DISPLAY = 450;
 
   // Delay before showing the MO options
   var DELAY_MO_DISPLAY = 450;
 
   // Duration of display animations
   var DISPLAY_ANIM_DURATION = 750;
+
+  // Delay before user input prompt is hidden
+  var DELAY_HIDE_PROMPT = 450;
 
   // Duration of the viewport scroll animation
   var SCROLL_ANIM_DURATION = 1000;
@@ -23,8 +26,8 @@
   // Message counter
   var messageCounter = 1;
 
-  // formCounter
-  var formCounter = 0;
+  // userInputCounter
+  var userInputCounter = 0;
 
   // Fetched user data, if any
   var userData;
@@ -114,6 +117,10 @@
     var i;
     var showNextMessage = true;
     var messageId;
+    var inputHtml;
+    var inputEl;
+    var userResponse;
+    var submitUserResponse;
 
     // Merge user data into the message and turn URLs into links
     body = makeLinks(mergeData(localized(content.body)));
@@ -177,11 +184,9 @@
 
         // render input prompt and add submit event listener
         template = $('#template-mt-user-prompt').html();
-        formCounter++
-        messageId = 'dailyshine' + getParameter('date').replace(/-/g, '') + 'msg' + messageCounter;
-        data.formCounter = formCounter;
-        var inputHtml = ejs.render(template, data, {delimiter: '?'});
-        var inputEl = $('#container-messages').append(inputHtml).children(':last');
+        userInputCounter++
+        inputHtml = ejs.render(template, { userInputCounter: userInputCounter }, {delimiter: '?'});
+        inputEl = $('#container-messages').append(inputHtml).children(':last');
 
         inputEl.hide()
             .delay(DELAY_MT_DISPLAY * (i + 3))
@@ -189,44 +194,29 @@
               $('.user-input-field').focus();
             });
 
-        // partially apply messageId
-        var handleSubmit = submitData.bind(this, messageId);
-        inputEl.on('submit', function(event, data) {
-          var userResponse = $('#responseForm-' + formCounter + ' input').val();
+        // partially apply messageId for form POST
+        messageId = 'dailyshine' + getParameter('date').replace(/-/g, '') + 'msg' + messageCounter;
+        submitUserResponse = submitData.bind(null, messageId);
+
+        // register submit event listener and handler
+        inputEl.on('submit', function(event) {
+          userResponse = $('#responseForm-' + userInputCounter + ' input').val();
           event.preventDefault();
           if (userResponse === "" ) return;
-          handleSubmit(userResponse);
-          showNextMessage = true;
 
-          // duplicate
-          // var displayDelay = 1000 * messages.length;
-          var displayDelay = DELAY_MT_DISPLAY;
-          var nextMessages = localized(content.nextMessages);
-          if (nextMessages && nextMessages.length > 0) {
-            loadMOChoices(nextMessages, displayDelay);
-          } else {
-            onMessagesFinished(displayDelay);
-          }
-          // duplicate
-
+          submitUserResponse(userResponse, function() {
+            displayUserResponse(userResponse);
+            showNextMessage = true;
+            loadMoreContent(localized(content.nextMessages), messages);
+          });
         });
         return;
       } // end if condition
     } // end for loop
 
     if (showNextMessage) {
-      // Fetch MO options to show the user, if any
-      var displayDelay = DELAY_MT_DISPLAY * messages.length;
-      var nextMessages = localized(content.nextMessages);
-      if (nextMessages && nextMessages.length > 0) {
-        loadMOChoices(nextMessages, displayDelay);
-      }
-      else {
-        onMessagesFinished(displayDelay);
-      }
+      loadMoreContent(localized(content.nextMessages), messages);
     }
-
-
   }
 
   /**
@@ -594,13 +584,10 @@
     animate and scroll down
 */
   function displayUserResponse(text) {
-    var data = {};
     var userResponseTemplate = $('#template-user-response').html();
-    data.userResponse = text;
-    $('#responseForm-' + formCounter).fadeOut(DISPLAY_ANIM_DURATION);
-    var userResponseHtml = ejs.render(userResponseTemplate, data, {delimiter: '?'});
-
-    // @TODO: make DRY
+    var userResponse = text;
+    $('#responseForm-' + userInputCounter).fadeOut(DELAY_HIDE_PROMPT);
+    var userResponseHtml = ejs.render(userResponseTemplate, {userResponse: userResponse}, {delimiter: '?'});
     var responseEl = $(userResponseHtml).hide()
     .appendTo('#container-messages')
     .delay(DELAY_USER_RESPONSE_DISPLAY)
@@ -618,7 +605,7 @@
     }, delay);
   }
 
-  function submitData(messageId, userResponse) {
+  function submitData(messageId, userResponse, cb) {
 
     var payload = {
       user: getParameter('r') || 'anon',
@@ -627,15 +614,25 @@
     };
 
     $.post('/endpoint', payload)
-      .done(function() {
-        // do something on success
+      .done(function(response) {
+        return response;
       })
       .fail(function() {
-        // do something on error
+        return new Error('Some error occurred');
       })
       .always(function() {
-        displayUserResponse(userResponse);
+        cb();
       });
+
+  }
+
+  function loadMoreContent(nextMessages, currentMessages) {
+    var displayDelay = DELAY_MT_DISPLAY * currentMessages.length;
+    if (nextMessages && nextMessages.length > 0) {
+      loadMOChoices(nextMessages, displayDelay);
+    } else {
+      onMessagesFinished(displayDelay);
+    }
   }
 
 })();
