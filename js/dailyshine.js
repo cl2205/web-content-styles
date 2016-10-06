@@ -160,18 +160,22 @@
       else if (data.linkTitle && data.linkUrl) {
         template = $('#template-mt-link').html();
       }
-      // check if message should prompt user response
-      else if (localized(content.promptForResponse)) {
+
+      else {
+        template = $('#template-mt').html();
+      }
+      // render message bubble
+      html = ejs.render(template, data, {delimiter: '?'});
+      element = $('#container-messages').append(html).children(':last');
+      element.hide()
+          .delay(DELAY_MT_DISPLAY * (i + 1))
+          .fadeIn(DISPLAY_ANIM_DURATION);
+
+      // if content should prompt user response, render input prompt and end message loop
+      if (localized(content.promptForResponse)) {
         showNextMessage = false;
 
-        // render message
-        template = $('#template-mt').html();
-        html = ejs.render(template, data, {delimiter: '?'});
-        element = $('#container-messages').append(html).children(':last');
-        element.hide()
-            .delay(DELAY_MT_DISPLAY * (i + 1))
-            .fadeIn(DISPLAY_ANIM_DURATION);
-        // render message with input field and add submit event listener
+        // render input prompt and add submit event listener
         template = $('#template-mt-user-prompt').html();
         formCounter++
         messageId = 'dailyshine' + getParameter('date').replace(/-/g, '') + 'msg' + messageCounter;
@@ -193,6 +197,8 @@
           if (userResponse === "" ) return;
           handleSubmit(userResponse);
           showNextMessage = true;
+
+          // duplicate
           // var displayDelay = 1000 * messages.length;
           var displayDelay = DELAY_MT_DISPLAY;
           var nextMessages = localized(content.nextMessages);
@@ -201,19 +207,12 @@
           } else {
             onMessagesFinished(displayDelay);
           }
+          // duplicate
+
         });
         return;
-      }
-      else {
-        template = $('#template-mt').html();
-      }
-
-      html = ejs.render(template, data, {delimiter: '?'});
-      element = $('#container-messages').append(html).children(':last');
-      element.hide()
-          .delay(DELAY_MT_DISPLAY * (i + 1))
-          .fadeIn(DISPLAY_ANIM_DURATION);
-    }
+      } // end if condition
+    } // end for loop
 
     if (showNextMessage) {
       // Fetch MO options to show the user, if any
