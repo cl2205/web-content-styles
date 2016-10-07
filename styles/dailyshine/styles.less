@@ -136,24 +136,36 @@ html {
 }
 
 .form-control {
-  margin: 8px 0px 8px 0px;
+  // margin: 8px 0px 8px 0px;
+  margin: 8px 0px 0px 0px;
   height: 100%;
   width: 100%;
+}
+
+.response-form {
+  margin: 8px 0px 0px 0px;
+  height: 30px;
+  // border-top: 1px solid @color-user-bg;
+  // border-bottom: 1px solid @color-user-bg;
 }
 
 .user-input-field {
   border-color: @color-user-bg;
   display: block;
   background: none;
-  padding: 2px 2px 1px;
+  // padding: 2px 2px 1px;
+  padding: 8px 2px 8px;
   border-width: 0 0 1px;
+  // border-width: 1px 0 0;
+  // border-width: 0 0 0;
   line-height: 26px;
-  height: 30px;
+  height: 100%;
   width: 80%;
   box-sizing: border-box;
   float: left;
   border-radius: 0px 0px 0px 0px;
   color: @color-input-text;
+  margin: 0px;
 }
 
 .button {
@@ -162,8 +174,8 @@ html {
   background-color: @color-background;
   border: none;
   outline: none;
-  padding: 0;
-  margine: 0;
+  padding: 2px 2px 0 2px;
+  height: 100%;
   width: 20%;
 }
 
@@ -171,10 +183,15 @@ html {
   outline: none;
 }
 
+.user-response-container {
+  overflow: auto;
+}
+
 .user-response {
   background: @color-user-bg;
   color: @color-user-text;
   border-radius: 20px 20px 20px 2px;
+  float: right;
 }
 
 /**

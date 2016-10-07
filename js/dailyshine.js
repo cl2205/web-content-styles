@@ -190,9 +190,16 @@
 
         inputEl.hide()
             .delay(DELAY_MT_DISPLAY * (i + 3))
-            .fadeIn(DISPLAY_ANIM_DURATION, function() {
-              $('.user-input-field').focus();
-            });
+            .fadeIn(DISPLAY_ANIM_DURATION);
+
+        // hide virtual keyboard when click/tap outside of input field
+        $('#container-messages').click(function () {
+          document.activeElement.blur();
+        });
+
+        $('.user-input-field').click(function (event) {
+          event.stopPropagation();
+        });
 
         // partially apply messageId for form POST
         messageId = 'dailyshine' + getParameter('date').replace(/-/g, '') + 'msg' + messageCounter;

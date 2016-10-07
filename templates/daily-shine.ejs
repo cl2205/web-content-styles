@@ -77,20 +77,18 @@
   <!-- Template for text input the user respond with. -->
   <script id="template-mt-user-prompt" type="text/template">
     <div>
-      <form id="responseForm-<?= userInputCounter ?>">
-        <div class="form-control">
+      <form id="responseForm-<?= userInputCounter ?>" class="response-form">
           <label>
-            <input type="text" name="response" class="user-input-field message-bubble" autofocus />
+            <input type="text" name="response" placeholder="Write a message..." class="user-input-field message-bubble" autofocus />
           </label>
           <button class="button" type="submit">Send</button>
-        </div>
       </form>
     </div>
   </script>
 
   <!-- Template for user response message bubble. -->
   <script id="template-user-response" type="text/template">
-    <div>
+    <div class="user-response-container">
       <div class="message-bubble user-response">
         <? if (typeof userResponse !== 'undefined') { ?>
           <?- userResponse ?>
