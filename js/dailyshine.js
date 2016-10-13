@@ -207,7 +207,7 @@
 
         // register submit event listener and handler
         inputEl.on('submit', function(event) {
-          userResponse = $('#responseForm-' + userInputCounter + ' input').val();
+          userResponse = $('#response-form-' + userInputCounter + ' input').val();
           event.preventDefault();
           if (userResponse === "" ) return;
 
@@ -593,7 +593,7 @@
   function displayUserResponse(text) {
     var userResponseTemplate = $('#template-user-response').html();
     var userResponse = text;
-    $('#responseForm-' + userInputCounter).fadeOut(DELAY_HIDE_PROMPT);
+    $('#response-form-' + userInputCounter).fadeOut(DELAY_HIDE_PROMPT);
     var userResponseHtml = ejs.render(userResponseTemplate, {userResponse: userResponse}, {delimiter: '?'});
     var responseEl = $(userResponseHtml).hide()
     .appendTo('#container-messages')
